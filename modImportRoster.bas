@@ -161,10 +161,7 @@ Public Function ExtractViaRegExp(inpStr, ByRef dbp)
     ' Get the first item in the Matches collection
     Set oMatch = oMatches(0)
     
-    '''DEBUGGING
     'Debug.Print oMatch.SubMatches(2)
-    
-    ''''''''''''
     
     If oMatch.SubMatches(0) <> "" Then
         dbp.Execute "INSERT INTO [_tRosterImport] (LastName, FirstName, GDCNum, Dorm, Bed) VALUES ('" & oMatch.SubMatches(0) & "', '" & RTrim(oMatch.SubMatches(1)) & "', " & oMatch.SubMatches(2) & ", " & oMatch.SubMatches(3) & ", " & oMatch.SubMatches(4) & ")"
@@ -203,12 +200,10 @@ Public Function ImportRoster()
     Switch.Option1.Enabled = True
     Switch.OptionLabel1.Enabled = True
         
-
-
     If IsRead = True Then
         'after importing the roster, we need to update DormAtCount on all open counts
         
-        'TO ADD: Option to NOT sanitize open counts, as this can delete a complete count
+        'TODO: Option to NOT sanitize open counts, as this can delete a complete count
         'if Alpha Roster import goes awry... UPDATE: new option not needed, with new
         'sanity checks on import
         
@@ -223,7 +218,7 @@ Public Function ImportRoster()
         db.Execute "3qUpdateToActive"
         NewTIC = db.RecordsAffected
         db.Execute "4qUpdateOpenCounts"
-        'need to look at alternatives for sanitize
+        'TODO need to look at alternatives for sanitize
         db.Execute "5qSanitizeOpenCounts"
 
         MsgBox "Successfully imported! " & vbNewLine & vbNewLine & NewInmates & " new inmates. " & vbNewLine & UpdatedInmates & " existing or returning inmates updated or verified. " & vbNewLine & vbNewLine & "Old TIC: " & OldTIC & vbNewLine & "New TIC: " & NewTIC, vbInformation, "Success!"
@@ -252,7 +247,7 @@ Public Function OpenPDF()
     'Dim objShell As Object
     
     PDFSelected = False
-'    RemoveImportTextfile
+    'RemoveImportTextfile
     
     Set fd = Application.FileDialog(3)
 
@@ -281,11 +276,12 @@ Public Function OpenPDF()
             
             Switch.lblLoad.Caption = "Converting alpha roster to text..."
             ConvertPDFtoTEXT (.SelectedItems(1))
-''''''''''''''''
+
+            'Loop until file is created; probably not the best way to do this
             Do While Dir(GetDBPath & "import.txt") = ""
                 'DoEvents
             Loop
-''''''''''''''''
+
             SleepVBA (250)
             Switch.Option1.Enabled = True
             Switch.OptionLabel1.Enabled = True
@@ -309,11 +305,14 @@ Public Function GetDBPath() As String
     Dim strFullPath As String
     strFullPath = Mid(DBEngine.Workspaces(0).Databases(0).TableDefs("tCountMain").Connect, 11)
     Dim i As Integer
+    
     For i = Len(strFullPath) To 1 Step -1
+        
         If Mid(strFullPath, i, 1) = "\" Then
             GetDBPath = Left(strFullPath, i)
             Exit For
         End If
+    
     Next
 
 End Function
