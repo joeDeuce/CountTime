@@ -129,7 +129,7 @@ End Function
 'to return OutCountID. maybe not needed, but we all need a little recursive love
 Function GetOutCountID(CountID, Column) As String
     'THIS IS SOME ORIGINAL CODE FROM BEFORE I KNEW 1/2 OF WHAT I'M DOING
-    'PROLLY NEEDS A CLOSE LOOK (i still only know 1/3 what i need to)
+    'TODO: PROLLY NEEDS A CLOSE LOOK (i still only know 1/3 what i need to)
     
     Dim Lrs2 As DAO.Recordset
     Dim SQL2 As String
@@ -137,7 +137,7 @@ Function GetOutCountID(CountID, Column) As String
     SQL2 = "SELECT OutCountID from tOutCount WHERE CountEventID = " & CountID & " AND OutCountColumn = " & Column
     Set Lrs2 = db.OpenRecordset(SQL2)
     If Lrs2.EOF And Lrs2.BOF Then
-        'Create New OutCount
+        'Need to Create New OutCount
         
         'This is fine, but when we close the outcount entry
         'form we need to delete records if nothing entered
@@ -163,7 +163,7 @@ Function UpdateWorksheet(ByRef Worksheet As Form, ByVal CountID As String, Optio
     Dim NewBDOC As Integer
     
     ' CountID should equal Worksheet.CountListBox.Value
-    ' not entirely convinced this is the best way to do this
+    ' TODO: not entirely convinced this is the best way to do this
     If CountID = -1 Then
         'ADD CODE TO LOAD MOST RECENT RECORD
         '(may no longer be needed)
@@ -259,15 +259,13 @@ Function UpdateWorksheet(ByRef Worksheet As Form, ByVal CountID As String, Optio
     For iL = 1 To 30
         
         Set LocText = Worksheet.Controls("Location" & iL)
-        LocText.Caption = "Location " & iL
-        '''''LocText.Caption = "|----------->"
-        'LocText.FontUnderline = False
-        'LocText.FontWeight = vbNormal
-        '
-        LocText.ForeColor = RGB(0, 175, 225)
-        LocText.HyperlinkAddress = "#"
-        LocText.ControlTipText = "Add Outcount"
-        '
+        With LocText
+            .Caption = "Location " & iL
+            .ForeColor = RGB(0, 175, 225)
+            .HyperlinkAddress = "#"
+            .ControlTipText = "Add Outcount"
+        End With
+        
         Set CurrentText = Worksheet.Controls("L" & iL & "Total")
         CurrentText.Value = ""
 
@@ -295,13 +293,11 @@ Function UpdateWorksheet(ByRef Worksheet As Form, ByVal CountID As String, Optio
         ColumnOutTotal = 0
         
         Set LocText = Worksheet.Controls("Location" & Column)
-        LocText.Caption = DLookup("OutCountLocationName", "tOutCountLocations Query", "CountEventID = " & GlobalCountID & " AND OutCountColumn = " & Column)
-        '
-        LocText.ForeColor = RGB(0, 100, 255)
-        'LocText.FontUnderline = True
-        LocText.ControlTipText = "Edit " & LocText.Caption & " Outcount"
-        '
-
+        With LocText
+            .Caption = DLookup("OutCountLocationName", "tOutCountLocations Query", "CountEventID = " & GlobalCountID & " AND OutCountColumn = " & Column)
+            .ForeColor = RGB(0, 100, 255)
+            .ControlTipText = "Edit " & LocText.Caption & " Outcount"
+        End With
         
         For ID = 1 To ctCount
         
@@ -353,16 +349,22 @@ WorksheetContinue:
         TotalIn = TotalIn + CInt(TotalInText.Value)
     Next
 
-    If TotalOut > 0 Then Worksheet.TotalOutTotal.Value = TotalOut Else Worksheet.TotalOutTotal.Value = ""
-    Worksheet.TotalInTotal.Value = TotalIn
-    
-    Worksheet.cmdDelete.Enabled = True
-    Worksheet.cmdDuplicate.Enabled = True
-    Worksheet.cmdReloadWorksheet.Enabled = True
-    Worksheet.cmdPrintPackage.Enabled = True
-    Worksheet.CountListBox.Requery
-    Worksheet.listHospital.Visible = True
-    Worksheet.listHospital.Requery
+    With Worksheet
+        If TotalOut > 0 Then
+            .TotalOutTotal.Value = TotalOut
+        Else
+            .TotalOutTotal.Value = ""
+        End If
+        
+        .TotalInTotal.Value = TotalIn
+        .cmdDelete.Enabled = True
+        .cmdDuplicate.Enabled = True
+        .cmdReloadWorksheet.Enabled = True
+        .cmdPrintPackage.Enabled = True
+        .CountListBox.Requery
+        .listHospital.Visible = True
+        .listHospital.Requery
+    End With
     
 Bye:
     
