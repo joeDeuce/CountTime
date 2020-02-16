@@ -1,0 +1,42 @@
+﻿Option Compare Database
+Option Explicit
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'                                                            '
+'  2019, 2020 Joe Langston, Langston Consulting              '
+'                                                            '
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+Private Sub Report_Load()
+
+    Dim NumLocations As Integer
+    Dim Lrs As DAO.Recordset
+    Dim SQL As String
+    Set db = CurrentDb()
+    SQL = "SELECT Count (*) FROM _tCountSlipPrint WHERE Print=Yes"
+    Set Lrs = db.OpenRecordset(SQL)
+    NumLocations = Lrs.Fields(0).Value
+    'db.Close
+    
+    'Set db = CurrentDb()
+    'SQL2 = "SELECT DormName FROM _tCountSlipPrint WHERE Print=Yes"
+    SQL = "SELECT DormName FROM _tCountSlipPrint WHERE Print=Yes"
+    Set Lrs = db.OpenRecordset(SQL)
+        
+    Dim iL As Integer
+    Dim LocationTextBox As Variant
+    For iL = 1 To NumLocations
+
+        Set LocationTextBox = GroupHeader0.Controls("txtLocation" & (iL))
+        LocationTextBox.Value = Lrs.Fields(0).Value
+        Lrs.MoveNext
+
+    Next
+    SQL = "SELECT tUnits.Unit FROM tUnits INNER JOIN _tCountSlipPrint ON tUnits.UnitID = [_tCountSlipPrint].UnitID WHERE ((([_tCountSlipPrint].Print)=Yes))"
+    Set Lrs = db.OpenRecordset(SQL)
+    Me.txtUnit.Value = Lrs.Fields(0).Value
+    db.Close
+    'Set db = Nothing
+    Set Lrs = Nothing
+        
+
+End Sub

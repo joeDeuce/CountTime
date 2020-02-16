@@ -1,0 +1,11 @@
+﻿Option Compare Database
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'                                                            '
+'  2019, 2020 Joe Langston, Langston Consulting              '
+'                                                            '
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+Private Sub Command18_Click()
+    DoCmd.Close
+    DoCmd.OpenReport "tDormRoster", acViewPreview
+End Sub

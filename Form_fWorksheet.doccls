@@ -1,0 +1,443 @@
+﻿Option Compare Database
+Option Explicit
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'                                                            '
+'  2019, 2020 Joe Langston, Langston Consulting              '
+'                                                            '
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+Private Sub cmdAddHospital_Click()
+    
+    Dim HospToAdd As Integer
+    If Me.cmbHospitalNames.Value Then
+        HospToAdd = Me.cmbHospitalNames.Value
+        Set db = CurrentDb()
+        db.Execute ("INSERT INTO [tHospitalMembers] (HospitalID, CountEventID) VALUES (" & HospToAdd & ", " & Me.txtCountEventID & ")")
+        Me.listHospital.Requery
+    Else
+        MsgBox "You must select a hospital to add!", vbOKOnly, "Error"
+    End If
+    
+End Sub
+
+Private Sub cmdClearTime_Click()
+    
+    Dim IsWorksheetUpdated As Boolean
+    
+    Me.txtCountCleared.Value = Date & " " & Time
+    Me.CountListBox.SetFocus
+    'CountListBox_AfterUpdate
+    IsWorksheetUpdated = UpdateWorksheet(Me, [Forms]![fWorksheet]!txtCountEventID)
+
+End Sub
+
+Private Sub cmdDelete_Click()
+    
+    If MsgBox("You are about to remove the " & Me.Text632 & " - " & Me.Text634 & " count." & vbNewLine & vbNewLine & "Are you SURE you want to do this?", vbYesNo, "Delete Count") = vbYes Then
+        On Error Resume Next
+        Set db = CurrentDb()
+        db.Execute ("DELETE FROM [tCountMain] WHERE [CountEventID]=" & Me.txtCountEventID)
+        db.Execute ("DELETE FROM [tOutCount] WHERE [CountEventID]=" & Me.txtCountEventID)
+        db.Execute ("DELETE FROM [tOutCountNames] WHERE [CountEventID]=" & Me.txtCountEventID)
+        Me.Dirty = False
+        DoCmd.Close
+        DoCmd.OpenForm "fWorksheet", acNormal, "", "", , acWindowNormal
+        'IsWorksheetUpdated = UpdateWorksheet(Me, -1)
+    End If
+        
+End Sub
+
+Private Sub cmdDeleteHospital_Click()
+    
+    Dim Hospital As Integer
+    If Me.listHospital.Column(2) Then
+        Hospital = Me.listHospital.Column(2)
+        Set db = CurrentDb()
+        db.Execute ("DELETE FROM (SELECT TOP 1 * FROM [tHospitalMembers] WHERE [CountEventID]=" & Me.txtCountEventID & " AND [HospitalID]=" & Hospital & ")")
+        Me.listHospital.Requery
+    Else
+        MsgBox "You must select a hospital to remove!", vbOKOnly, "Error"
+    End If
+    
+End Sub
+
+Private Sub cmdDuplicate_Click()
+'make a duplicate copy of the selected count
+
+        
+    Dim SelectedCount As String
+
+    SelectedCount = [Forms]![fWorksheet]!txtCountEventID
+    
+    'make sure count isn't blank
+    If IsCountBlank(CInt(SelectedCount)) Then
+        MsgBox "Count is blank. There is nothing to duplicate.", vbExclamation, "Error"
+        Exit Sub
+    End If
+    
+    DoCmd.OpenForm "fDuplicate", acNormal, "", "", , acNormal, SelectedCount
+
+
+End Sub
+
+Private Sub cmdReloadWorksheet_Click()
+
+    Dim IsWorksheetUpdated As Boolean
+    IsWorksheetUpdated = UpdateWorksheet(Me, [Forms]![fWorksheet]!txtCountEventID)
+
+End Sub
+
+Private Sub Form_Close()
+    Me.Visible = False
+End Sub
+
+Private Sub Form_Load()
+   
+    Dim IsWorksheetUpdated As Boolean
+    
+    'tried other ways, but always end up
+    'having to select *
+    Me.RecordSource = "Select * from [tCountMain]"
+    
+    On Error Resume Next 'in case there are zero count records
+    Me.Recordset.MoveLast
+    
+    IsWorksheetUpdated = UpdateWorksheet(Me, [Forms]![fWorksheet]!txtCountEventID)
+
+End Sub
+
+Private Sub listHospital_DblClick(Cancel As Integer)
+    
+    cmdDeleteHospital_Click
+
+End Sub
+
+Private Sub Location1_Click()
+    
+    GlobalOCID = GetOutCountID(Me.CountEventID, 1)
+    DoCmd.OpenForm "fOutcountEntry", acNormal, "", "", , acNormal, GlobalOCID
+
+End Sub
+
+Private Sub Location2_Click()
+    
+    GlobalOCID = Str(GetOutCountID(Me.CountEventID, 2))
+    DoCmd.OpenForm "fOutcountEntry", acNormal, "", "", , acNormal, GlobalOCID
+
+End Sub
+
+Private Sub Location3_Click()
+    
+    GlobalOCID = Str(GetOutCountID(Me.CountEventID, 3))
+    DoCmd.OpenForm "fOutcountEntry", acNormal, "", "", , acNormal, GlobalOCID
+
+End Sub
+
+Private Sub Location4_Click()
+    
+    GlobalOCID = Str(GetOutCountID(Me.CountEventID, 4))
+    DoCmd.OpenForm "fOutcountEntry", acNormal, "", "", , acNormal, GlobalOCID
+
+End Sub
+
+Private Sub Location5_Click()
+    
+    GlobalOCID = Str(GetOutCountID(Me.CountEventID, 5))
+    DoCmd.OpenForm "fOutcountEntry", acNormal, "", "", , acNormal, GlobalOCID
+
+End Sub
+
+Private Sub Location6_Click()
+    
+    GlobalOCID = Str(GetOutCountID(Me.CountEventID, 6))
+    DoCmd.OpenForm "fOutcountEntry", acNormal, "", "", , acNormal, GlobalOCID
+
+End Sub
+
+Private Sub Location7_Click()
+    
+    GlobalOCID = Str(GetOutCountID(Me.CountEventID, 7))
+    DoCmd.OpenForm "fOutcountEntry", acNormal, "", "", , acNormal, GlobalOCID
+
+End Sub
+
+Private Sub Location8_Click()
+    
+    GlobalOCID = Str(GetOutCountID(Me.CountEventID, 8))
+    DoCmd.OpenForm "fOutcountEntry", acNormal, "", "", , acNormal, GlobalOCID
+
+End Sub
+
+Private Sub Location9_Click()
+    
+    GlobalOCID = Str(GetOutCountID(Me.CountEventID, 9))
+    DoCmd.OpenForm "fOutcountEntry", acNormal, "", "", , acNormal, GlobalOCID
+
+End Sub
+
+Private Sub Location10_Click()
+    
+    GlobalOCID = Str(GetOutCountID(Me.CountEventID, 10))
+    DoCmd.OpenForm "fOutcountEntry", acNormal, "", "", , acNormal, GlobalOCID
+
+End Sub
+
+Private Sub Location11_Click()
+    
+    GlobalOCID = Str(GetOutCountID(Me.CountEventID, 11))
+    DoCmd.OpenForm "fOutcountEntry", acNormal, "", "", , acNormal, GlobalOCID
+
+End Sub
+
+Private Sub Location12_Click()
+    
+    GlobalOCID = Str(GetOutCountID(Me.CountEventID, 12))
+    DoCmd.OpenForm "fOutcountEntry", acNormal, "", "", , acNormal, GlobalOCID
+
+End Sub
+
+Private Sub Location13_Click()
+    
+    GlobalOCID = Str(GetOutCountID(Me.CountEventID, 13))
+    DoCmd.OpenForm "fOutcountEntry", acNormal, "", "", , acNormal, GlobalOCID
+
+End Sub
+
+Private Sub Location14_Click()
+    
+    GlobalOCID = Str(GetOutCountID(Me.CountEventID, 14))
+    DoCmd.OpenForm "fOutcountEntry", acNormal, "", "", , acNormal, GlobalOCID
+
+End Sub
+
+Private Sub Location15_Click()
+    
+    GlobalOCID = Str(GetOutCountID(Me.CountEventID, 15))
+    DoCmd.OpenForm "fOutcountEntry", acNormal, "", "", , acNormal, GlobalOCID
+
+End Sub
+
+Private Sub Location16_Click()
+    
+    GlobalOCID = Str(GetOutCountID(Me.CountEventID, 16))
+    DoCmd.OpenForm "fOutcountEntry", acNormal, "", "", , acNormal, GlobalOCID
+
+End Sub
+
+Private Sub Location17_Click()
+    
+    GlobalOCID = Str(GetOutCountID(Me.CountEventID, 17))
+    DoCmd.OpenForm "fOutcountEntry", acNormal, "", "", , acNormal, GlobalOCID
+
+End Sub
+
+Private Sub Location18_Click()
+    
+    GlobalOCID = Str(GetOutCountID(Me.CountEventID, 18))
+    DoCmd.OpenForm "fOutcountEntry", acNormal, "", "", , acNormal, GlobalOCID
+
+End Sub
+
+Private Sub Location19_Click()
+    
+    GlobalOCID = Str(GetOutCountID(Me.CountEventID, 19))
+    DoCmd.OpenForm "fOutcountEntry", acNormal, "", "", , acNormal, GlobalOCID
+
+End Sub
+
+Private Sub Location20_Click()
+    
+    GlobalOCID = Str(GetOutCountID(Me.CountEventID, 20))
+    DoCmd.OpenForm "fOutcountEntry", acNormal, "", "", , acNormal, GlobalOCID
+
+End Sub
+
+Private Sub Location21_Click()
+    
+    GlobalOCID = Str(GetOutCountID(Me.CountEventID, 21))
+    DoCmd.OpenForm "fOutcountEntry", acNormal, "", "", , acNormal, GlobalOCID
+
+End Sub
+
+Private Sub Location22_Click()
+    
+    GlobalOCID = Str(GetOutCountID(Me.CountEventID, 22))
+    DoCmd.OpenForm "fOutcountEntry", acNormal, "", "", , acNormal, GlobalOCID
+
+End Sub
+
+Private Sub Location23_Click()
+    
+    GlobalOCID = Str(GetOutCountID(Me.CountEventID, 23))
+    DoCmd.OpenForm "fOutcountEntry", acNormal, "", "", , acNormal, GlobalOCID
+
+End Sub
+
+Private Sub Location24_Click()
+    
+    GlobalOCID = Str(GetOutCountID(Me.CountEventID, 24))
+    DoCmd.OpenForm "fOutcountEntry", acNormal, "", "", , acNormal, GlobalOCID
+
+End Sub
+
+Private Sub Location25_Click()
+    
+    GlobalOCID = Str(GetOutCountID(Me.CountEventID, 25))
+    DoCmd.OpenForm "fOutcountEntry", acNormal, "", "", , acNormal, GlobalOCID
+
+End Sub
+
+Private Sub Location26_Click()
+    
+    GlobalOCID = Str(GetOutCountID(Me.CountEventID, 26))
+    DoCmd.OpenForm "fOutcountEntry", acNormal, "", "", , acNormal, GlobalOCID
+
+End Sub
+
+Private Sub Location27_Click()
+    
+    GlobalOCID = Str(GetOutCountID(Me.CountEventID, 27))
+    DoCmd.OpenForm "fOutcountEntry", acNormal, "", "", , acNormal, GlobalOCID
+
+End Sub
+
+Private Sub Location28_Click()
+    
+    GlobalOCID = Str(GetOutCountID(Me.CountEventID, 28))
+    DoCmd.OpenForm "fOutcountEntry", acNormal, "", "", , acNormal, GlobalOCID
+
+End Sub
+
+Private Sub Location29_Click()
+    
+    GlobalOCID = Str(GetOutCountID(Me.CountEventID, 29))
+    DoCmd.OpenForm "fOutcountEntry", acNormal, "", "", , acNormal, GlobalOCID
+
+End Sub
+
+Private Sub Location30_Click()
+    
+    GlobalOCID = Str(GetOutCountID(Me.CountEventID, 30))
+    DoCmd.OpenForm "fOutcountEntry", acNormal, "", "", , acNormal, GlobalOCID
+
+End Sub
+
+Private Sub CountListBox_AfterUpdate()
+
+    Dim IsWorksheetUpdated As Boolean
+    IsWorksheetUpdated = UpdateWorksheet(Me, Me.CountListBox)
+    'cmdReloadWorksheet_Click
+
+End Sub
+
+'------------------------------------------------------------
+' Text550_Enter
+'
+'------------------------------------------------------------
+'Private Sub Text550_Enter()
+'On Error GoTo Text550_Enter_Err
+'
+'    DoCmd.GoToRecord acForm, "fWorksheet", acLast
+'
+'
+'Text550_Enter_Exit:
+'    Exit Sub
+'
+'Text550_Enter_Err:
+'    MsgBox Error$
+'    Resume Text550_Enter_Exit
+'
+'End Sub
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+'------------------------------------------------------------
+' cmdCreateNew_Click
+'
+'------------------------------------------------------------
+Private Sub cmdCreateNew_Click()
+On Error GoTo cmdCreateNew_Click_Err
+
+    ' _AXL:<?xml version="1.0" encoding="UTF-16" standalone="no"?>
+    ' <UserInterfaceMacro For="Text550" Event="OnEnter" xmlns="http://schemas.microsoft.com/office/accessservices/2009/11/application"><Statements><Action Name="GoToRecord"><Argument Name="ObjectTy
+    ' _AXL:pe">Form</Argument><Argument Name="ObjectName">fWorksheet</Argument><Argument Name="Record">Last</Argument></Action></Statements></UserInterfaceMacro>
+    DoCmd.OpenForm "fCreateNew", acNormal, "", "", , acNormal
+
+cmdCreateNew_Click_Exit:
+    Exit Sub
+
+cmdCreateNew_Click_Err:
+    MsgBox Error$
+    Resume cmdCreateNew_Click_Exit
+
+End Sub
+
+
+'------------------------------------------------------------
+' cmdPrintPackage_Click
+'
+'------------------------------------------------------------
+Private Sub cmdPrintPackage_Click()
+On Error GoTo cmdPrintPackage_Click_Err
+
+    ' _AXL:<?xml version="1.0" encoding="UTF-16" standalone="no"?>
+    ' <UserInterfaceMacro For="cmdCreateNew" Event="OnClick" xmlns="http://schemas.microsoft.com/office/accessservices/2009/11/application"><Statements><Action Name="OpenForm"><Argument Name="FormN
+    ' _AXL:ame">fCreateNew</Argument></Action><Action Name="Requery"><Argument Name="ControlName">Forms!fWorksheet</Argument></Action></Statements></UserInterfaceMacro>
+    DoCmd.RunCommand acCmdRefresh
+    DoCmd.OpenForm "fPrintSelect", acNormal, "", "", , acNormal
+
+
+cmdPrintPackage_Click_Exit:
+    Exit Sub
+
+cmdPrintPackage_Click_Err:
+    'MsgBox Error$
+    Resume cmdPrintPackage_Click_Exit
+
+End Sub
+
+
+'------------------------------------------------------------
+' Command637_Click
+'
+'------------------------------------------------------------
+Private Sub Command637_Click()
+On Error GoTo Command637_Click_Err
+
+    ' _AXL:<?xml version="1.0" encoding="UTF-16" standalone="no"?>
+    ' <UserInterfaceMacro For="cmdPrintPackage" Event="OnClick" xmlns="http://schemas.microsoft.com/office/accessservices/2009/11/application"><Statements><Action Name="RunMenuCommand"><Argument Na
+    ' _AXL:me="Command">Refresh</Argument></Action><Action Name="OpenForm"><Argument Name="FormName">fPrintSelect</Argument></Action></Statements></UserInterfaceMacro>
+    DoCmd.Close acForm, "fWorksheet"
+
+
+Command637_Click_Exit:
+    Exit Sub
+
+Command637_Click_Err:
+    MsgBox Error$
+    Resume Command637_Click_Exit
+
+End Sub
+
+
+'------------------------------------------------------------
+' cmdEditHospitalMembers_Click
+'
+'------------------------------------------------------------
+Private Sub cmdEditHospitalMembers_Click()
+On Error GoTo cmdEditHospitalMembers_Click_Err
+
+    ' _AXL:<?xml version="1.0" encoding="UTF-16" standalone="no"?>
+    ' <UserInterfaceMacro For="Command637" Event="OnClick" xmlns="http://schemas.microsoft.com/office/accessservices/2009/11/application"><Statements><Action Name="CloseWindow"><Argument Name="Obje
+    ' _AXL:ctType">Form</Argument><Argument Name="ObjectName">fWorksheet</Argument><Argument Name="Save">Yes</Argument></Action></Statements></UserInterfaceMacro>
+    DoCmd.OpenForm "fHospitalMembers", acNormal, "", "", , acNormal
+
+
+cmdEditHospitalMembers_Click_Exit:
+    Exit Sub
+
+cmdEditHospitalMembers_Click_Err:
+    MsgBox Error$
+    Resume cmdEditHospitalMembers_Click_Exit
+
+End Sub
+

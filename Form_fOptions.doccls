@@ -1,0 +1,22 @@
+﻿Option Compare Database
+Option Explicit
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'                                                            '
+'  2019, 2020 Joe Langston, Langston Consulting              '
+'                                                            '
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+Private Sub Command0_Click()
+    DoCmd.Close acForm, "fOptions", acSaveNo
+End Sub
+
+Private Sub Form_Load()
+    
+    'retrive version number
+    Dim vMaj, vMin As Integer
+    Dim Version As String
+    vMaj = GetOption("VersionMajor")
+    vMin = GetOption("VersionMinor")
+    Version = "Version " & CStr(vMaj) & "." & CStr(Format(vMin, "0000"))
+
+End Sub

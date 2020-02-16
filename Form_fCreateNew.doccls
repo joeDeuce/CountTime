@@ -1,0 +1,70 @@
+﻿Option Compare Database
+Option Explicit
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'                                                            '
+'  2019, 2020 Joe Langston, Langston Consulting              '
+'                                                            '
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+Private Sub cmdCancelCreation_Click()
+    
+    DoCmd.Close
+
+End Sub
+
+Private Sub cmdCreateNewCount_Click()
+
+    'On Error Resume Next
+    
+    If DCount("[CountDate]", "[tCountMain]", "CountDate=#" & Me.NewDate & "# AND CountTime=#" & Me.NewTime & "#") > 0 Then
+        MsgBox "Count already exists!", vbExclamation, "Error!"
+        Exit Sub
+    End If
+
+    
+    Dim DormCountArray(13) As Variant
+    Dim AUnitTotal As Integer
+    Dim RSATTotal As Integer
+    Dim TIC As Integer
+    Dim ID As Integer
+    
+    For ID = 1 To 13
+
+        'Dim db As Database
+        Dim Lrs As DAO.Recordset
+        Dim SQL As String
+    
+        Set db = CurrentDb()
+
+        SQL = "SELECT Count(*) AS DormCount FROM tBaseline WHERE (((tBaseline.Dorm)=" & ID & ") AND ((tBaseline.InActive)=False));"
+    
+        Set Lrs = db.OpenRecordset(SQL)
+        DormCountArray(ID) = Lrs.Fields(0).Value
+        TIC = TIC + DormCountArray(ID)
+        If ID < 8 Or ID > 11 Then
+            AUnitTotal = AUnitTotal + DormCountArray(ID)
+        Else
+            RSATTotal = RSATTotal + DormCountArray(ID)
+        End If
+        
+        'Set db = Nothing
+        Set Lrs = Nothing
+    
+    Next
+
+    db.Execute "INSERT INTO [tCountMain] (CountDate, CountTime, AUnitTotal, RSATTotal, TIC, UnitCountDorm1, UnitCountDorm2, UnitCountDorm3, UnitCountDorm4, UnitCountDorm5, UnitCountDorm6, UnitCountDorm7, UnitCountDorm8, UnitCountDorm9, UnitCountDorm10, UnitCountDorm11, UnitCountDorm12, UnitCountDorm13) VALUES " & _
+                      "(#" & Me.NewDate & "#, #" & Me.NewTime & "#, " & AUnitTotal & ", " & RSATTotal & ", " & TIC & ", " & DormCountArray(1) & ", " & DormCountArray(2) & ", " & DormCountArray(3) & ", " & DormCountArray(4) & ", " & DormCountArray(5) & ", " & DormCountArray(6) & ", " & DormCountArray(7) & ", " & DormCountArray(8) & ", " & DormCountArray(9) & ", " & DormCountArray(10) & ", " & DormCountArray(11) & ", " & DormCountArray(12) & ", " & DormCountArray(13) & ")"
+    
+    'db.Close
+            
+    Forms!fWorksheet.Dirty = False
+    
+    DoCmd.Close
+    
+    DoCmd.Close acForm, "fWorksheet", acSaveYes
+    'DoCmd.RepaintObject
+    DoCmd.OpenForm "fWorksheet", acNormal, "", "", , acNormal
+    'AfterChangeWorksheet
+
+End Sub
+

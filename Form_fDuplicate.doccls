@@ -1,0 +1,46 @@
+﻿Option Compare Database
+Option Explicit
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'                                                            '
+'  2019, 2020 Joe Langston, Langston Consulting              '
+'                                                            '
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+Private Sub cmdCancelCreation_Click()
+    
+    DoCmd.Close
+
+End Sub
+
+Private Sub cmdDuplicateCount_Click()
+
+    On Error GoTo err
+    If DCount("[CountDate]", "[tCountMain]", "CountDate=#" & Me.NewDate & "# AND CountTime=#" & Me.NewTime & "#") > 0 Then
+        MsgBox "Count already exists!", vbExclamation, "Error!"
+        Exit Sub
+    End If
+
+    Dim Success As Boolean
+    Success = DuplicateCompleteCount(Me.txtCountEventID, Me)
+    
+    DoCmd.Close acForm, "fDuplicate"
+    
+    'DoCmd.Close acForm, "fWorksheet", acSaveYes
+    'DoCmd.RepaintObject
+    DoCmd.OpenForm "fWorksheet", acNormal, "", "", , acNormal
+    'AfterChangeWorksheet
+    Exit Sub
+    
+err:
+    MsgBox "Make sure you select a valid date and time.", vbCritical, "Error"
+    
+End Sub
+
+Private Sub Form_Load()
+    Dim iL As Integer
+    
+    For iL = 0 To List9.ListCount - 1
+        List9.Selected(iL) = True
+    Next
+
+End Sub

@@ -1,0 +1,18 @@
+﻿Option Compare Database
+Option Explicit
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'                                                            '
+'  2019, 2020 Joe Langston, Langston Consulting              '
+'                                                            '
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+Private Sub Form_Timer()
+    DoCmd.OpenForm "Switchboard"
+    SleepVBA (5000)
+    DoCmd.Close acForm, "fSplash"
+End Sub
+
+Private Sub Label2_DblClick(Cancel As Integer)
+    DoCmd.OpenForm "Switchboard"
+    DoCmd.Close acForm, "fSplash"
+End Sub

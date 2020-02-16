@@ -1,0 +1,83 @@
+﻿Option Compare Database
+Option Explicit
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'                                                            '
+'  2019, 2020 Joe Langston, Langston Consulting              '
+'                                                            '
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+Private Sub Command0_Click()
+    DoCmd.Close acForm, "fAbout", acSaveNo
+End Sub
+
+Private Sub Form_Load()
+    
+    'retrive version number
+    Dim vMaj, vMin As Integer
+    Dim Version As String
+    vMaj = GetOption("VersionMajor")
+    vMin = GetOption("VersionMinor")
+    Version = "Version " & CStr(vMaj) & "." & CStr(Format(vMin, "0000"))
+    
+    Me.lblVersion.Caption = Version
+
+End Sub
+
+Private Sub Label13_Click()
+    MsgBox "2019.0718 - Sped up worksheet load" & vbNewLine & _
+           "2019.0721 - Correct hospital addition when nothing selected" & vbNewLine & _
+           "2019.0725 - Correct outcount name selection problem" & vbNewLine & _
+           "2019.0730 - Updated forms to reflect updated SOP" & vbNewLine & _
+           "2019.0731 - Added bed number to outcount entry window" & vbNewLine & _
+           "2019.0803 - Minor cosmetic adjustments" & vbNewLine & _
+           "2019.0824 - Fixed error when trying to duplicate blank count" & vbNewLine & _
+           "2019.0828 - Only Walker alpha roster able to be imported" & vbNewLine & _
+           "2019.1223 - Optimized initial worksheet load" & vbNewLine & _
+           "2019.1230 - Update Copyright Notices Throughout Code" & vbNewLine & _
+           "2020.0102 - More optimization" & vbNewLine & _
+           "2020.0118 - Additional options implemented" & vbNewLine & _
+           "" & vbNewLine & _
+           "" & vbNewLine & _
+           vbNewLine, vbOKOnly, "Update History"
+
+End Sub
+
+Private Sub Label2_DblClick(Cancel As Integer)
+    Me.cmcExecute.Visible = True
+    Me.txtCommand.Visible = True
+    Me.txtCommand.SetFocus
+End Sub
+
+Private Sub cmcExecute_Click()
+    Select Case Me.txtCommand.Value
+        Case "enableblank"
+'            Set db = CurrentDb()
+'            db.Execute "UPDATE _tOptions SET OptionValue=1 WHERE OptionName='DisplayBlank'"
+            SetOption "DisplayBlank", 1
+            MsgBox "Blank worksheet can now be printed from print window", vbOKOnly, "Success"
+        Case "disableblank"
+'            Set db = CurrentDb()
+'            db.Execute "UPDATE _tOptions SET OptionValue=0 WHERE OptionName='DisplayBlank'"
+            SetOption "DisplayBlank", 0
+            MsgBox "Success!", vbOKOnly, "Success"
+        Case "relink"
+            RunCommand acCmdLinkedTableManager
+        Case "editbaseline"
+            DoCmd.OpenForm "fEditBaseline"
+        Case "editimport"
+            DoCmd.OpenTable "_tRosterImport"
+        Case "editimportexecute"
+            Set db = CurrentDb()
+            db.Execute "1qUpdateToInactive"
+            db.Execute "2qUpdateExisting"
+            db.Execute "22qAppendNew"
+            db.Execute "3qUpdateToActive"
+            db.Execute "4qUpdateOpenCounts"
+            db.Execute "5qSanitizeOpenCounts"
+        Case "help"
+            MsgBox "enableblank - Enable Blank Worksheet" & vbNewLine & "disableblank - Disable Blank Worksheet" & vbNewLine & "relink - Relink to Back-end Database" & vbNewLine & "editbaseline - Edit Baseline Roster" & vbNewLine & "editimport - Edit Import Table" & vbNewLine & "editimportexecute - Apply changes made by 'editimport'", vbOKOnly, "Help"
+    End Select
+    
+    Me.txtCommand.SetFocus
+
+End Sub

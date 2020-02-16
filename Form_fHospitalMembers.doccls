@@ -1,0 +1,22 @@
+﻿Option Compare Database
+Option Explicit
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'                                                            '
+'  2019, 2020 Joe Langston, Langston Consulting              '
+'                                                            '
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+Private Sub Form_Close()
+    'DoCmd.RunCommand acCmdSaveRecord
+    'Dim IsWorksheetUpdated As Boolean
+    On Error Resume Next
+    'IsWorksheetUpdated = UpdateWorksheet([Forms]![fWorksheet], [Forms]![fWorksheet]!txtCountEventID)
+    [Forms]![fWorksheet].listHospital.Requery
+End Sub
+
+Private Sub Form_Open(Cancel As Integer)
+
+    DoCmd.GoToRecord acDataForm, "fHospitalMembers", acNewRec
+    
+
+End Sub

@@ -1,0 +1,18 @@
+﻿Option Compare Database
+Option Explicit
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'                                                            '
+'  2019, 2020 Joe Langston, Langston Consulting              '
+'                                                            '
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+Private Sub Detail_Click()
+    DoCmd.GoToRecord acActiveDataObject, , acGoTo
+End Sub
+
+Private Sub Form_DataChange(ByVal Reason As Long)
+    If Forms!fOutCountEntry!Combo11.Value = 102 Then
+        MsgBox "You MUST choose a location!", vbCritical, "Error"
+    End If
+
+End Sub

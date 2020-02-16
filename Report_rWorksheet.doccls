@@ -1,0 +1,59 @@
+﻿Option Compare Database
+Option Explicit
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'                                                            '
+'  2019, 2020 Joe Langston, Langston Consulting              '
+'                                                            '
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+Function UnitTotalPlusHospitals(ID) As Integer
+
+    'Dim db As Database
+    Dim Lrs2 As DAO.Recordset
+    Dim SQL2 As String
+    
+    'Dirty way to count... UPDATE!
+    Set db = CurrentDb()
+    SQL2 = "SELECT Count(*) FROM tHospitalMembers WHERE (CountEventID=" & ID & ")"
+    Set Lrs2 = db.OpenRecordset(SQL2)
+    UnitTotalPlusHospitals = Int(Lrs2.Fields(0)) + Forms!fWorksheet!TIC
+    
+    db.Close
+    'Set db = Nothing
+    Set Lrs2 = Nothing
+
+
+End Function
+
+Private Sub Report_Load()
+
+    'need to format based on number of hospitals
+    'if there are more than 3 different hospital locations, we will have problems
+    Me.Detail.Visible = False
+    Me.linePostHosp.Visible = False
+    Dim CountID As Integer
+    Dim HospitalCount As Integer
+    CountID = Forms!fWorksheet!CountEventID
+
+    ReportWorksheet Me, CountID, OpenArgs
+
+    HospitalCount = GetHospitalCount(CountID)
+
+    Select Case HospitalCount
+    Case 0
+        Me.Printer.TopMargin = 1170
+    Case 1
+        Me.Printer.TopMargin = 980
+    Case 2
+        Me.Printer.TopMargin = 700
+    Case Is > 2
+        Me.Printer.TopMargin = 660
+        Me.Printer.BottomMargin = 630
+    End Select
+
+    If HospitalCount > 0 Then
+        Me.Detail.Visible = True
+        Me.linePostHosp.Visible = True
+    End If
+
+End Sub

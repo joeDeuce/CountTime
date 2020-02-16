@@ -1,0 +1,29 @@
+﻿Option Compare Database
+Option Explicit
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'                                                            '
+'  2019, 2020 Joe Langston, Langston Consulting              '
+'                                                            '
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+Private Sub Report_Load()
+    Dim fObj As Variant
+    Set fObj = Forms!fPrintSelect!List213
+    
+    Dim LocationBoxID As Integer
+    Dim LocationTextBox As Variant
+    LocationBoxID = 1
+    Set LocationTextBox = GroupHeader0.Controls("txtLocation" & (LocationBoxID))
+    LocationTextBox.Value = fObj
+    
+'    Dim iH As Integer
+'    For iH = 0 To fObj.ListCount - 1
+'        If fObj.Selected(iH) Then
+'            On Error Resume Next
+'            Set LocationTextBox = GroupHeader0.Controls("txtLocation" & (LocationBoxID))
+'            LocationTextBox.Value = fObj.ItemData(iH)
+'            LocationBoxID = LocationBoxID + 1
+'        End If
+'    Next
+    
+End Sub

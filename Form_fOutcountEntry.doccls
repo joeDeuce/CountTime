@@ -1,0 +1,274 @@
+﻿Option Compare Database
+Option Explicit
+Dim ColumnID As Integer
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'                                                            '
+'  2019, 2020 Joe Langston, Langston Consulting              '
+'                                                            '
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+Private Sub cmdImportOutCount_Click()
+    
+    DoCmd.OpenForm "fOutcountImport", acNormal, "", "", , , GlobalOCID
+
+End Sub
+
+Private Sub cmdPrint_Click()
+    
+    Dim topper As Integer
+    Dim QueryCaboose As String
+    
+    GlobalOCID = Me.txtOutCountID
+    topper = GetNumRecordsNeededOutCount
+    
+    If IsCountCleared(GlobalCountID) Then
+        QueryCaboose = ""
+    Else
+        QueryCaboose = " AND ((tBaseline.InActive)=False)"
+    End If
+    
+    If Me.Combo11 = 102 Then
+        MsgBox "You must select 'Location' before printing out count.", vbExclamation, "Error"
+        Exit Sub
+    End If
+    
+    'temp print table:
+    Set db = CurrentDb()
+    db.Execute "DELETE * FROM _tOutCountNames"
+    db.Execute "INSERT INTO [_tOutCountNames] SELECT tOutCountNames.CountEventID, tOutCountNames.OutCountID, tOutCountNames.GDCNum, tOutCountNames.DormAtCount FROM tBaseline INNER JOIN tOutCountNames ON tOutCountNames.GDCNum=tBaseline.GDCNum WHERE ((OutCountID=" & GlobalOCID & ")" & QueryCaboose & ") ORDER BY DormAtCount"
+    If topper > 0 Then db.Execute "INSERT INTO [_tOutCountNames] SELECT TOP " & topper & " * FROM tOutCountUnion"
+    
+    DoCmd.OpenReport "rOutCount", acViewPreview, "", "", acWindowNormal
+
+End Sub
+
+Private Sub Combo11_Change()
+    
+    Frame29_AfterUpdate
+
+End Sub
+
+Private Sub Form_Close()
+    
+    Dim IsWorksheetUpdated As Boolean
+    
+    If IsCountCleared(Forms!fWorksheet!txtCountEventID) Then Exit Sub
+    IsWorksheetUpdated = UpdateWorksheet([Forms]![fWorksheet], [Forms]![fWorksheet]!txtCountEventID)
+    
+End Sub
+
+Private Sub Form_KeyDown(KeyCode As Integer, Shift As Integer)
+  
+    If KeyCode = vbKeyPageUp Then KeyCode = 0: Exit Sub
+    If KeyCode = vbKeyPageDown Then KeyCode = 0: Exit Sub
+
+End Sub
+
+Private Sub Form_Load()
+
+    DoCmd.SearchForRecord , "", acFirst, "[OutCountID] = " & OpenArgs
+    If OpenArgs <> Null Then GlobalOCID = OpenArgs
+    
+    Dim IsCleared As Boolean
+    
+    'we need to disable things if count is cleared
+    IsCleared = IsCountCleared(Forms!fWorksheet!txtCountEventID)
+    
+    If IsCleared Then
+        
+        Me.fOutCountEntrySubForm.Enabled = False
+        Me.Combo11.Enabled = False
+        Me.txtSearch.Enabled = False
+        Me.Frame29.Enabled = False
+        Me.List24.Enabled = False
+        Me.cmdDelete.Enabled = False
+        Me.cmdImportOutCount.Enabled = False
+
+    Else
+    
+        Me.fOutCountEntrySubForm.Enabled = True
+        Me.Combo11.Enabled = True
+        Me.txtSearch.Enabled = True
+        Me.Frame29.Enabled = True
+        Me.List24.Enabled = True
+        Me.cmdDelete.Enabled = True
+        Me.cmdImportOutCount.Enabled = True
+        Me.Combo11.SetFocus
+        
+    End If
+
+End Sub
+
+Private Sub Form_Unload(Cancel As Integer)
+    
+    
+    On Error Resume Next
+    GlobalOCID = [Forms]![fOutCountEntry]!OutCountID
+    If GetNumRecordsNeededOutCount() = 28 Then Exit Sub
+    
+    If Me.Combo11.Value = 102 Then
+        MsgBox "You must select a location!", vbExclamation, "Error"
+        Cancel = True
+    End If
+
+End Sub
+
+Private Sub Frame29_Click()
+    
+    If Me.Dirty Then Me.Dirty = False
+    Me.txtSearch.SetFocus
+
+End Sub
+
+
+Private Sub List24_DblClick(Cancel As Integer)
+
+    Dim InmateOutcount As String
+    InmateOutcount = IsOnOutcount(Me.List24.Value, Me.CountEventID)
+    
+    If InmateOutcount = "SELECT LOCATION" Then
+        MsgBox ("Inmate is already on THIS outcount!")
+    ElseIf InmateOutcount <> "" Then
+        MsgBox ("Inmate is already on <" & InmateOutcount & "> outcount!")
+    Else
+        Set db = CurrentDb()
+        db.Execute "INSERT INTO [tOutCountNames] (CountEventID, OutCountID, GDCNum, DormAtCount) VALUES " & _
+                      "(" & Me.CountEventID & ", " & [Forms]![fOutCountEntry]!OutCountID & ", " & Me.List24.Value & ", " & Me.List24.Column(2) & ")"
+        Me.txtSearch.Value = ""
+    End If
+''''''''''''''''''''''''''''''
+    Me.txtSearch.SetFocus
+''''''''''''''''''''''''''''''
+    Me.fOutCountEntrySubForm.Requery
+
+End Sub
+
+Private Sub List24_KeyPress(KeyAscii As Integer)
+    
+    If KeyAscii = vbKeyReturn Then
+        Dim InmateOutcount As String
+        Dim InmateID As Long
+        Dim CurrentDorm As Integer
+        On Error Resume Next
+        InmateID = Me.List24.ItemData(0)
+        CurrentDorm = GetCurrentDorm(InmateID)
+        InmateOutcount = IsOnOutcount(InmateID, Me.CountEventID)
+        
+        If InmateOutcount = "SELECT LOCATION" Then
+            MsgBox ("Inmate is already on THIS outcount!")
+        ElseIf InmateOutcount <> "" Then
+            MsgBox ("Inmate is already on <" & InmateOutcount & "> outcount!")
+        Else
+            Set db = CurrentDb()
+            db.Execute "INSERT INTO [tOutCountNames] (CountEventID, OutCountID, GDCNum, DormAtCount) VALUES " & _
+                          "(" & Me.CountEventID & ", " & [Forms]![fOutCountEntry]!OutCountID & ", " & InmateID & ", " & CurrentDorm & ")"
+            Me.txtSearch.Value = ""
+        End If
+    
+        Me.txtSearch.SetFocus
+        Me.fOutCountEntrySubForm.Requery
+    End If
+
+End Sub
+
+'Requery the list of inmates each time the text changes
+Private Sub txtSearch_Change()
+    On Error GoTo txtSearch_Change_Err
+    'If txtSearch.Value <> "" Then
+    '    Me.List24.RowSource = "qOutCountSearchList"
+    Me.List24.Requery
+    'Else
+    '    Me.List24.RowSource = ""
+    'End If
+        
+txtSearch_Change_Exit:
+    Exit Sub
+
+txtSearch_Change_Err:
+    MsgBox Error$
+    Resume txtSearch_Change_Exit
+
+End Sub
+
+Private Sub cmdClose_Click()
+    On Error GoTo cmdClose_Click_Err
+    Dim NumNeeded As Integer
+    GlobalOCID = [Forms]![fOutCountEntry]!OutCountID
+    ColumnID = Me.txtColumnID
+    NumNeeded = GetNumRecordsNeededOutCount()
+    
+    'If NumNeeded = 30 And Me.Combo11.Value <> 102 Then ' location selected, but no inmates added
+    '    MsgBox "You must add at least one inmate!" & vbNewLine & vbNewLine & "Add inmate(s) or clear location!", vbExclamation, "Error"
+    '    GoTo cmdClose_Click_Exit
+    'End If
+    
+    If NumNeeded = 28 Then GoTo CloseForm 'no inmates added, ok to close
+    
+    If Me.Combo11.Value = 102 Then 'inmates are on the outcount but no location selected
+        MsgBox "You must select a location!", vbExclamation, "Error"
+        GoTo cmdClose_Click_Exit
+    End If
+
+CloseForm:
+    DoCmd.Close acForm, "fOutcountEntry", acSaveYes
+
+cmdClose_Click_Exit:
+    Exit Sub
+
+cmdClose_Click_Err:
+    MsgBox Error$
+    Resume cmdClose_Click_Exit
+
+End Sub
+
+'delete entire outcount
+Private Sub cmdDelete_Click()
+    On Error GoTo cmdDelete_Click_Err
+
+    DoCmd.GoToControl Screen.PreviousControl.Name
+    err.Clear
+    
+    DoCmd.SetWarnings False
+    If MsgBox("Are you SURE you want to delete this outcount?", vbYesNo, "Delete Out Count") = vbYes Then
+        If (Not Form.NewRecord) Then
+            DoCmd.RunCommand acCmdDeleteRecord
+        End If
+        If (Form.NewRecord And Not Form.Dirty) Then
+            Beep
+        End If
+        If (Form.NewRecord And Form.Dirty) Then
+            DoCmd.RunCommand acCmdUndo
+        End If
+        If (MacroError <> 0) Then
+            Beep
+            MsgBox MacroError.Description, vbOKOnly, ""
+        End If
+        DoCmd.Close acForm, "fOutcountEntry"
+    End If
+cmdDelete_Click_Exit:
+    Exit Sub
+
+cmdDelete_Click_Err:
+    MsgBox Error$
+    Resume cmdDelete_Click_Exit
+
+End Sub
+
+'Requery List when unit selection changes
+'this is duplicate code and needs to be consolodated with
+'AfterUpdate for the text box
+Private Sub Frame29_AfterUpdate()
+    On Error GoTo Frame29_AfterUpdate_Err
+
+    DoCmd.Requery "List24"
+    Me.Dirty = False
+
+Frame29_AfterUpdate_Exit:
+    Exit Sub
+
+Frame29_AfterUpdate_Err:
+    MsgBox Error$
+    Resume Frame29_AfterUpdate_Exit
+
+End Sub
+

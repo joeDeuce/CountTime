@@ -1,0 +1,45 @@
+﻿Option Compare Database
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'                                                            '
+'  2019, 2020 Joe Langston, Langston Consulting              '
+'                                                            '
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+Private Sub Form_Open(Cancel As Integer)
+    
+    DoCmd.RunCommand acCmdWindowHide
+    Set db = CurrentDb()
+        
+    'On Error GoTo Err_Form_Open
+        
+End Sub
+
+Private Sub Form_Load()
+    
+    'retrive version number
+    Dim vMaj, vMin As Integer
+    Dim Version As String
+    vMaj = GetOption("VersionMajor")
+    vMin = GetOption("VersionMinor")
+    Version = "Version " & CStr(vMaj) & "." & CStr(Format(vMin, "0000"))
+    
+    DoCmd.RunCommand acCmdWindowHide
+    
+    Me.lblVersion.Caption = Version
+    
+    'Me.lblLoad.Caption = qLastUpdate.LastUpdate
+    On Error GoTo Relink
+    Me.lblLoad.Caption = "Alpha Roster last imported " & DLookup("LastUpdate", "qLastUpdate")
+    Exit Sub
+
+Relink:
+    RunCommand acCmdLinkedTableManager
+    Me.lblLoad.Caption = "Alpha Roster last imported " & DLookup("LastUpdate", "qLastUpdate")
+    
+End Sub
+
+Private Sub Form_Unload(Cancel As Integer)
+    
+    Set db = Nothing
+
+End Sub

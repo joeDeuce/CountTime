@@ -1,0 +1,75 @@
+﻿Option Compare Database
+Option Explicit
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'                                                            '
+'  2019, 2020 Joe Langston, Langston Consulting              '
+'                                                            '
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+Private Sub cmbCount_AfterUpdate()
+
+    Me.cmbOutcount.Requery
+    'Me.fOutcountImportSubform.Requery
+
+End Sub
+
+Private Sub cmbOutcount_AfterUpdate()
+
+    Forms!fOutCountImport!txtOutCount.Value = Me.cmbOutcount
+    Me.fOutcountImportSubform.Requery
+
+End Sub
+
+Private Sub cmdImport_Click()
+    On Error GoTo err
+    Dim OutCountID As Integer
+    Dim LocationID As Integer
+    Dim SQL As String
+    Dim NumberSkipped As Integer
+    Dim NumberImported As Integer
+    NumberSkipped = 0
+    NumberImported = 0
+    Dim rs As Variant
+    Set rs = Forms!fOutCountImport!fOutcountImportSubform.Form.Recordset
+    
+    DoCmd.SetWarnings False
+
+    Dim InmateOutcount As String
+    While Not rs.EOF
+    
+        InmateOutcount = IsOnOutcount(rs!GDCNumber, Forms!fWorksheet!CountEventID)
+        If InmateOutcount <> "" Then
+            NumberSkipped = NumberSkipped + 1
+        Else
+            DoCmd.RunSQL ("INSERT INTO [tOutCountNames] (CountEventID, OutCountID, GDCNum, DormAtCount) VALUES " & _
+                          "(" & Forms!fWorksheet!CountEventID & ", " & [Forms]![fOutCountEntry]!OutCountID & ", " & rs!GDCNumber & ", " & rs!DormAssignment & ")")
+            NumberImported = NumberImported + 1
+        End If
+        rs.MoveNext
+    Wend
+    DoCmd.SetWarnings True
+    Forms!fOutCountEntry!fOutCountEntrySubForm.Requery
+    
+    'retrieve imported outcount location and set out count to it
+    OutCountID = Forms!fOutCountImport!cmbOutcount.Value
+    
+    Set db = CurrentDb()
+    SQL = "SELECT LocationID FROM tOutCount WHERE OutCountID = " & OutCountID
+    Set rs = db.OpenRecordset(SQL)
+    LocationID = rs.Fields(0).Value
+    
+    Forms!fOutCountEntry!Combo11.Value = LocationID
+    
+    DoCmd.Close
+    
+    MsgBox "Imported " + Str(NumberImported) + vbNewLine + "Skipped " + Str(NumberSkipped), vbInformation, "Import Complete"
+    
+    Exit Sub
+err:
+    MsgBox Error$ & vbNewLine & vbNewLine & "Please try again."
+    
+End Sub
+
+Private Sub Command9_Click()
+    DoCmd.Close acForm, "fOutcountImport"
+End Sub

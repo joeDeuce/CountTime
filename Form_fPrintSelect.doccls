@@ -1,0 +1,435 @@
+﻿Option Compare Database
+Option Explicit
+Public CombineIfPossible As Boolean
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'                                                            '
+'  2019, 2020 Joe Langston, Langston Consulting              '
+'                                                            '
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+Private Sub ck1_Click()
+    UpdateDormsToPrint (Me.lck1.Caption)
+    cmdPrintSelectedCountSlip_Click
+    UnselectAll
+End Sub
+Private Sub ck2_Click()
+
+    UpdateDormsToPrint (Me.lck2.Caption)
+    cmdPrintSelectedCountSlip_Click
+    UnselectAll
+End Sub
+Private Sub ck3_Click()
+
+    UpdateDormsToPrint (Me.lck3.Caption)
+    cmdPrintSelectedCountSlip_Click
+    UnselectAll
+End Sub
+Private Sub ck4_Click()
+
+    UpdateDormsToPrint (Me.lck4.Caption)
+    cmdPrintSelectedCountSlip_Click
+    UnselectAll
+End Sub
+Private Sub ck5_Click()
+
+    UpdateDormsToPrint (Me.lck5.Caption)
+    cmdPrintSelectedCountSlip_Click
+    UnselectAll
+End Sub
+Private Sub ck6_Click()
+
+    UpdateDormsToPrint (Me.lck6.Caption)
+    cmdPrintSelectedCountSlip_Click
+    UnselectAll
+End Sub
+Private Sub ck7_Click()
+
+    UpdateDormsToPrint (Me.lck7.Caption)
+    cmdPrintSelectedCountSlip_Click
+    UnselectAll
+End Sub
+Private Sub ck8_Click()
+
+    UpdateDormsToPrint (Me.lck8.Caption)
+    cmdPrintSelectedCountSlip_Click
+    UnselectAll
+End Sub
+Private Sub ck9_Click()
+
+    UpdateDormsToPrint (Me.lck9.Caption)
+    cmdPrintSelectedCountSlip_Click
+    UnselectAll
+End Sub
+Private Sub ck10_Click()
+
+    UpdateDormsToPrint (Me.lck10.Caption)
+    cmdPrintSelectedCountSlip_Click
+    UnselectAll
+End Sub
+Private Sub ck11_Click()
+
+    UpdateDormsToPrint (Me.lck11.Caption)
+    cmdPrintSelectedCountSlip_Click
+    UnselectAll
+End Sub
+Private Sub ck12_Click()
+
+    UpdateDormsToPrint (Me.lck12.Caption)
+    cmdPrintSelectedCountSlip_Click
+    UnselectAll
+End Sub
+Private Sub ck13_Click()
+
+    UpdateDormsToPrint (Me.lck13.Caption)
+    cmdPrintSelectedCountSlip_Click
+    UnselectAll
+End Sub
+Sub UnselectAll()
+    Dim sID As Integer
+    Dim TempControl As Variant
+    For sID = 1 To 13
+        Set TempControl = Me.Controls("ck" & sID)
+        TempControl.Value = 0
+    Next
+End Sub
+Sub WriteTableToPrint(ByVal DormString As String)
+    Set db = CurrentDb()
+    db.Execute ("UPDATE _qCountSlipPrint SET Print = False")
+    db.Execute ("UPDATE _qCountSlipPrint SET Print = True WHERE Dorm IN (" & DormString & ")")
+    Me.Requery
+End Sub
+Sub UpdateDormsToPrint(ByRef ControlLabel As String)
+
+    'we need to read the label to see which dorms to print
+    Select Case ControlLabel
+    Case "Dorm 1"
+        WriteTableToPrint ("1")
+    Case "Dorm 2"
+        WriteTableToPrint ("2")
+    Case "Dorm 3"
+        WriteTableToPrint ("3")
+    Case "Dorm 4"
+        WriteTableToPrint ("4")
+    Case "Dorm 5"
+        WriteTableToPrint ("5")
+    Case "Dorm 6"
+        WriteTableToPrint ("6")
+    Case "Dorm 7 - ISO/Seg"
+        WriteTableToPrint ("7,13")
+    Case "Dorm 8"
+        WriteTableToPrint ("8")
+    Case "Dorm 9"
+        WriteTableToPrint ("9")
+    Case "Dorm 10"
+        WriteTableToPrint ("10")
+    Case "Dorm 11"
+        WriteTableToPrint ("11")
+    Case "Dorm 12"
+        WriteTableToPrint ("12")
+    Case "ISO/Seg"
+        WriteTableToPrint ("13")
+    Case "Dorms 1-2"
+        WriteTableToPrint ("1,2")
+    Case "Dorms 3-4"
+        WriteTableToPrint ("3,4")
+    Case "Dorms 5-6"
+        WriteTableToPrint ("5,6")
+    Case "Dorms 1-6"
+        WriteTableToPrint ("1,2,3,4,5,6")
+    Case "Dorms 8-9"
+        WriteTableToPrint ("8,9")
+    Case "Dorms 10-11"
+        WriteTableToPrint ("10,11")
+    Case "Dorms 8-11"
+        WriteTableToPrint ("8,9,10,11")
+    End Select
+
+End Sub
+
+Private Sub cmdPrintSelectedCountSlip_Click()
+    Dim CountID As Integer
+    Dim topper As Integer
+    CountID = Forms!fWorksheet!txtCountEventID
+    topper = GetNumRecordsNeededCountSlip
+    
+    'make temp table:
+    'DoCmd.RefreshRecord
+    DoCmd.SetWarnings False
+    DoCmd.RunSQL ("DROP TABLE [_tOutCountNames]")
+    DoCmd.RunSQL ("CREATE TABLE [_tOutCountNames] (CountEventID Long, OutCountID Long, GDCNum Long, DormAtCount Integer)")
+    DoCmd.RunSQL ("INSERT INTO [_tOutCountNames] SELECT * FROM tOutCountNames WHERE (((CountEventID)=" & CountID & ") AND ((DormAtCount) In (SELECT Dorm FROM _tCountSlipPrint WHERE Print=Yes))) ORDER BY OutCountID")
+    If topper > 0 Then DoCmd.RunSQL ("INSERT INTO [_tOutCountNames] SELECT TOP " & topper & " * FROM tOutCountUnion")
+    DoCmd.SetWarnings True
+    
+    DoCmd.OpenReport "rCountSlip", acViewPreview, "", ""
+
+End Sub
+
+Private Sub Command215_Click()
+    
+    Dim NumSelected As Integer
+    Dim i As Integer
+    NumSelected = 0
+    
+    For i = 0 To List212.ListCount - 1
+        If List212.Selected(i) = True Then
+            NumSelected = NumSelected + 1
+        End If
+    Next i
+    
+    If NumSelected > 8 Then
+        MsgBox "At most 8 locations can be on a single count slip.", vbExclamation, "Error"
+        Exit Sub
+    End If
+    
+    DoCmd.OpenReport "rCountSlipLocations", acViewPreview, "", ""
+    
+    'use to clear the selection after printing
+    'each set of location count slips
+    'For i = 0 To List212.ListCount - 1
+    '    List212.Selected(i) = False
+    'Next i
+
+End Sub
+
+Private Sub Command232_Click()
+    Me.List212.Value = 0
+End Sub
+
+Private Sub Form_Load()
+
+    Dim i As Integer
+    Dim TempControl As Variant
+    Dim TempControlLabel As Variant
+    For i = 1 To 13
+        Set TempControl = Me.Controls("ck" & i)
+        Set TempControlLabel = Me.Controls("lck" & i)
+        TempControl.Visible = False
+        TempControlLabel.Visible = False
+        'If i <> 13 Then TempControlLabel.Caption = "Dorm " & i Else TempControlLabel.Caption = "ISO/Seg"
+    Next
+    
+'    If DLookup("OptionValue", "_tOptions", "OptionName='DisplayBlank'") = 1 Then
+    If GetOption("DisplayBlank") = 1 Then
+        Me.Command230.Visible = True
+    Else
+        Me.Command230.Visible = False
+    End If
+    
+    'NextControl keeps up with which control to label
+    Dim NextControl As Integer
+    NextControl = 1
+    
+    If DCount("DormAtCount", "tOutCountNames", "DormAtCount IN (1,2,3,4,5,6) AND CountEventID=" & GlobalCountID) > gCountSlipLines Then
+    'need to bust it up
+        If DCount("DormAtCount", "tOutCountNames", "DormAtCount IN (1,2) AND CountEventID=" & GlobalCountID) > gCountSlipLines Then
+           'we need to bust 1 & 2 up MORE!
+           SetControl NextControl, "Dorm 1"
+           SetControl NextControl + 1, "Dorm 2"
+           NextControl = NextControl + 2
+        Else
+            '1 and 2 will go on one
+           SetControl NextControl, "Dorms 1-2"
+           NextControl = NextControl + 1
+        End If
+        
+        If DCount("DormAtCount", "tOutCountNames", "DormAtCount IN (3,4) AND CountEventID=" & GlobalCountID) > gCountSlipLines Then
+            'bust up 3 and 4
+           SetControl NextControl, "Dorm 3"
+           SetControl NextControl + 1, "Dorm 4"
+           NextControl = NextControl + 2
+        Else
+            '3 and 4 on one
+           SetControl NextControl, "Dorms 3-4"
+           NextControl = NextControl + 1
+        End If
+        
+        If DCount("DormAtCount", "tOutCountNames", "DormAtCount IN (5,6) AND CountEventID=" & GlobalCountID) > gCountSlipLines Then
+            'bust up 5 and 6
+           SetControl NextControl, "Dorm 5"
+           SetControl NextControl + 1, "Dorm 6"
+           NextControl = NextControl + 2
+        Else
+            '5 and 6 on one
+           SetControl NextControl, "Dorms 5-6"
+           NextControl = NextControl + 1
+        End If
+            
+    Else
+        'we can put 1-6 on a single slip
+        SetControl NextControl, "Dorms 1-6"
+        NextControl = NextControl + 1
+    End If
+    
+    'Dorm 7
+    SetControl NextControl, "Dorm 7 - ISO/Seg"
+    NextControl = NextControl + 1
+    
+    'RSAT:
+    If DCount("DormAtCount", "tOutCountNames", "DormAtCount IN (8,9,10,11) AND CountEventID=" & GlobalCountID) > gCountSlipLines Then
+    'need to bust it up
+        If DCount("DormAtCount", "tOutCountNames", "DormAtCount IN (8,9) AND CountEventID=" & GlobalCountID) > gCountSlipLines Then
+           'we need to bust 8 & 9 up MORE!
+           SetControl NextControl, "Dorm 8"
+           SetControl NextControl + 1, "Dorm 9"
+           NextControl = NextControl + 2
+        Else
+            '8 and 9 will go on one
+           SetControl NextControl, "Dorms 8-9"
+           NextControl = NextControl + 1
+        End If
+        
+        If DCount("DormAtCount", "tOutCountNames", "DormAtCount IN (10,11) AND CountEventID=" & GlobalCountID) > gCountSlipLines Then
+            'bust up 10 and 11
+           SetControl NextControl, "Dorm 10"
+           SetControl NextControl + 1, "Dorm 11"
+           NextControl = NextControl + 2
+        Else
+            '10 and 11 on one
+           SetControl NextControl, "Dorms 10-11"
+           NextControl = NextControl + 1
+        End If
+      
+    Else
+        'we can put 8-11 on a single slip
+        SetControl NextControl, "Dorms 8-11"
+        NextControl = NextControl + 1
+    End If
+    
+    SetControl NextControl, "Dorm 12"
+    'NextControl = NextControl + 1
+    'SetControl NextControl, "ISO/Seg"
+
+    Set TempControl = Nothing
+    Set TempControlLabel = Nothing
+    
+    If DCount("HospitalID", "tHospitalMembers", "CountEventID=" & GlobalCountID) > 0 Then
+        'there is at least one hospital
+        Me.List213.Enabled = True
+        Me.Label223.Visible = True
+        Me.List213.Visible = True
+    Else
+        'no hospital, disable control
+        Me.List213.Enabled = False
+        Me.Label223.Visible = False
+        Me.List213.Visible = False
+    End If
+
+End Sub
+
+Public Sub SetControl(ByRef CtlNumber As Integer, StrText As String)
+    
+    Dim TempControl As Variant
+    Dim TempControlLabel As Variant
+    Set TempControl = Me.Controls("ck" & CtlNumber)
+    Set TempControlLabel = Me.Controls("lck" & CtlNumber)
+    TempControl.Value = 0
+    TempControlLabel.Caption = StrText
+    TempControl.Visible = True
+    TempControlLabel.Visible = True
+
+End Sub
+
+Private Sub List213_Click()
+
+    DoCmd.OpenReport "rCountSlipHospital", acViewPreview, "", ""
+
+End Sub
+
+Private Sub List214_Click()
+    
+    Dim topper As Integer
+    Dim QueryCaboose As String
+    'load outcount depending on selection
+    'GlobalOCID should equal item clicked
+    GlobalOCID = Me.List214.Value
+    
+    topper = GetNumRecordsNeededOutCount
+    
+    GlobalCountID = GetCountID()
+    
+    If IsCountCleared(GlobalCountID) Then
+        'QueryCaboose = ""
+        QueryCaboose = ""
+    Else
+        QueryCaboose = " AND ((tBaseline.InActive)=False)"
+    End If
+    
+    'make temp table:
+    DoCmd.SetWarnings False
+    DoCmd.RunSQL ("DROP TABLE [_tOutCountNames]")
+    DoCmd.RunSQL ("CREATE TABLE [_tOutCountNames] (CountEventID Long, OutCountID Long, GDCNum Long, DormAtCount Integer)")
+    DoCmd.RunSQL ("INSERT INTO [_tOutCountNames] SELECT tOutCountNames.CountEventID, tOutCountNames.OutCountID, tOutCountNames.GDCNum, tOutCountNames.DormAtCount FROM tBaseline INNER JOIN tOutCountNames ON tOutCountNames.GDCNum=tBaseline.GDCNum WHERE ((OutCountID=" & GlobalOCID & ")" & QueryCaboose & ") ORDER BY DormAtCount")
+    'DoCmd.RunSQL ("INSERT INTO [_tOutCountNames] SELECT * FROM tOutCountNames WHERE (OutCountID=" & GlobalOCID & ")" & QueryCaboose & " ORDER BY DormAtCount")
+    If topper > 0 Then DoCmd.RunSQL ("INSERT INTO [_tOutCountNames] SELECT TOP " & topper & " * FROM tOutCountUnion")
+    DoCmd.SetWarnings True
+    
+    DoCmd.OpenReport "rOutCount", acViewPreview, "", "", acWindowNormal
+
+
+End Sub
+'------------------------------------------------------------
+' Command203_Click
+'
+'------------------------------------------------------------
+Private Sub Command203_Click()
+On Error GoTo Command203_Click_Err
+
+    DoCmd.OpenReport "rWorksheet", acViewPreview, "", "", acNormal, False
+
+
+Command203_Click_Exit:
+    Exit Sub
+
+Command203_Click_Err:
+    MsgBox Error$
+    Resume Command203_Click_Exit
+
+End Sub
+
+
+'------------------------------------------------------------
+' Command230_Click
+'
+'------------------------------------------------------------
+Private Sub Command230_Click()
+On Error GoTo Command230_Click_Err
+
+    ' _AXL:<?xml version="1.0" encoding="UTF-16" standalone="no"?>
+    ' <UserInterfaceMacro For="Command203" Event="OnClick" xmlns="http://schemas.microsoft.com/office/accessservices/2009/11/application"><Statements><Action Name="OpenReport"><Argument Name="Repor
+    ' _AXL:tName">rWorksheet</Argument><Argument Name="View">Print Preview</Argument></Action></Statements></UserInterfaceMacro>
+    DoCmd.OpenReport "rWorksheet", acViewPreview, "", "", acNormal, True
+
+
+Command230_Click_Exit:
+    Exit Sub
+
+Command230_Click_Err:
+    MsgBox Error$
+    Resume Command230_Click_Exit
+
+End Sub
+
+
+'------------------------------------------------------------
+' Command205_Click
+'
+'------------------------------------------------------------
+Private Sub Command205_Click()
+On Error GoTo Command205_Click_Err
+
+    ' _AXL:<?xml version="1.0" encoding="UTF-16" standalone="no"?>
+    ' <UserInterfaceMacro For="Command230" Event="OnClick" xmlns="http://schemas.microsoft.com/office/accessservices/2009/11/application"><Statements><Action Name="OpenReport"><Argument Name="Repor
+    ' _AXL:tName">rWorksheet</Argument><Argument Name="View">Print Preview</Argument></Action></Statements></UserInterfaceMacro>
+    DoCmd.Close acForm, "fPrintSelect"
+
+
+Command205_Click_Exit:
+    Exit Sub
+
+Command205_Click_Err:
+    MsgBox Error$
+    Resume Command205_Click_Exit
+
+End Sub
+
