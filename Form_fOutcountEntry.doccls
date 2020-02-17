@@ -44,7 +44,17 @@ End Sub
 
 Private Sub Combo11_Change()
     
-    Frame29_AfterUpdate
+    On Error GoTo Combo11_Change_Err
+
+    DoCmd.Requery "List24"
+    'Me.Dirty = False
+
+Combo11_Change_Exit:
+    Exit Sub
+
+Combo11_Change_Err:
+    MsgBox Error$
+    Resume Combo11_Change_Exit
 
 End Sub
 
