@@ -1,4 +1,4 @@
-﻿Option Compare Database
+Option Compare Database
 
 Private Sub Form_Open(Cancel As Integer)
     
