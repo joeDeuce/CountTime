@@ -1,4 +1,4 @@
-Option Compare Database
+﻿Option Compare Database
 Option Explicit
 
 Private Sub Command0_Click()
@@ -8,32 +8,23 @@ End Sub
 Private Sub Form_Load()
     
     'retrive version number
-    Dim vMaj, vMin As Integer
     Dim Version As String
-    vMaj = GetOption("VersionMajor")
-    vMin = GetOption("VersionMinor")
-    Version = "Version " & CStr(vMaj) & "." & CStr(Format(vMin, "0000"))
+    Version = "v" & GetCountTimeVersion()
     
     Me.lblVersion.Caption = Version
 
 End Sub
 
 Private Sub Label13_Click()
-    MsgBox "2019.0718 - Sped up worksheet load" & vbNewLine & _
-           "2019.0721 - Correct hospital addition when nothing selected" & vbNewLine & _
-           "2019.0725 - Correct outcount name selection problem" & vbNewLine & _
-           "2019.0730 - Updated forms to reflect updated SOP" & vbNewLine & _
-           "2019.0731 - Added bed number to outcount entry window" & vbNewLine & _
-           "2019.0803 - Minor cosmetic adjustments" & vbNewLine & _
-           "2019.0824 - Fixed error when trying to duplicate blank count" & vbNewLine & _
-           "2019.0828 - Only Walker alpha roster able to be imported" & vbNewLine & _
-           "2019.1223 - Optimized initial worksheet load" & vbNewLine & _
-           "2019.1230 - Update Copyright Notices Throughout Code" & vbNewLine & _
-           "2020.0102 - More optimization" & vbNewLine & _
-           "2020.0118 - Additional options implemented" & vbNewLine & _
-           "" & vbNewLine & _
-           "" & vbNewLine & _
-           vbNewLine, vbOKOnly, "Update History"
+    
+    MsgBox "Copyright (c) 2019, 2020 Langston Consulting" & vbNewLine & vbNewLine & _
+        "Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the ""Software""), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:" & vbNewLine & _
+        "" & vbNewLine & _
+        "The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software." & vbNewLine & _
+        vbNewLine, vbOKOnly, "MIT License"
+    
+    MsgBox "THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE." & _
+        vbNewLine, vbOKOnly, "MIT License"
 
 End Sub
 
