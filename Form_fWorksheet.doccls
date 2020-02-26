@@ -27,17 +27,20 @@ Private Sub cmdClearTime_Click()
 End Sub
 
 Private Sub cmdDelete_Click()
+
+    Dim CountEventToDelete
     
     If MsgBox("You are about to remove the " & Me.Text632 & " - " & Me.Text634 & " count." & vbNewLine & vbNewLine & "Are you SURE you want to do this?", vbYesNo, "Delete Count") = vbYes Then
-        On Error Resume Next
+        'On Error Resume Next
         Set db = CurrentDb()
-        db.Execute ("DELETE FROM [tCountMain] WHERE [CountEventID]=" & Me.txtCountEventID)
-        db.Execute ("DELETE FROM [tOutCount] WHERE [CountEventID]=" & Me.txtCountEventID)
-        db.Execute ("DELETE FROM [tOutCountNames] WHERE [CountEventID]=" & Me.txtCountEventID)
+        CountEventToDelete = Me.txtCountEventID
+        db.Execute ("DELETE FROM [tCountMain] WHERE [CountEventID]=" & CountEventToDelete)
+        db.Execute ("DELETE FROM [tOutCount] WHERE [CountEventID]=" & CountEventToDelete)
+        db.Execute ("DELETE FROM [tOutCountNames] WHERE [CountEventID]=" & CountEventToDelete)
         Me.Dirty = False
         DoCmd.Close
         DoCmd.OpenForm "fWorksheet", acNormal, "", "", , acWindowNormal
-        'IsWorksheetUpdated = UpdateWorksheet(Me, -1)
+        'UpdateWorksheet Me, -1
     End If
         
 End Sub
@@ -320,41 +323,14 @@ End Sub
 Private Sub CountListBox_AfterUpdate()
 
     Dim IsWorksheetUpdated As Boolean
+    If IsNull(Me.CountListBox) Then Exit Sub
     IsWorksheetUpdated = UpdateWorksheet(Me, Me.CountListBox)
-    'cmdReloadWorksheet_Click
 
 End Sub
 
-'------------------------------------------------------------
-' Text550_Enter
-'
-'------------------------------------------------------------
-'Private Sub Text550_Enter()
-'On Error GoTo Text550_Enter_Err
-'
-'    DoCmd.GoToRecord acForm, "fWorksheet", acLast
-'
-'
-'Text550_Enter_Exit:
-'    Exit Sub
-'
-'Text550_Enter_Err:
-'    MsgBox Error$
-'    Resume Text550_Enter_Exit
-'
-'End Sub
-''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-'------------------------------------------------------------
-' cmdCreateNew_Click
-'
-'------------------------------------------------------------
 Private Sub cmdCreateNew_Click()
 On Error GoTo cmdCreateNew_Click_Err
 
-    ' _AXL:<?xml version="1.0" encoding="UTF-16" standalone="no"?>
-    ' <UserInterfaceMacro For="Text550" Event="OnEnter" xmlns="http://schemas.microsoft.com/office/accessservices/2009/11/application"><Statements><Action Name="GoToRecord"><Argument Name="ObjectTy
-    ' _AXL:pe">Form</Argument><Argument Name="ObjectName">fWorksheet</Argument><Argument Name="Record">Last</Argument></Action></Statements></UserInterfaceMacro>
     DoCmd.OpenForm "fCreateNew", acNormal, "", "", , acNormal
 
 cmdCreateNew_Click_Exit:
@@ -374,9 +350,6 @@ End Sub
 Private Sub cmdPrintPackage_Click()
 On Error GoTo cmdPrintPackage_Click_Err
 
-    ' _AXL:<?xml version="1.0" encoding="UTF-16" standalone="no"?>
-    ' <UserInterfaceMacro For="cmdCreateNew" Event="OnClick" xmlns="http://schemas.microsoft.com/office/accessservices/2009/11/application"><Statements><Action Name="OpenForm"><Argument Name="FormN
-    ' _AXL:ame">fCreateNew</Argument></Action><Action Name="Requery"><Argument Name="ControlName">Forms!fWorksheet</Argument></Action></Statements></UserInterfaceMacro>
     DoCmd.RunCommand acCmdRefresh
     DoCmd.OpenForm "fPrintSelect", acNormal, "", "", , acNormal
 
@@ -398,11 +371,7 @@ End Sub
 Private Sub Command637_Click()
 On Error GoTo Command637_Click_Err
 
-    ' _AXL:<?xml version="1.0" encoding="UTF-16" standalone="no"?>
-    ' <UserInterfaceMacro For="cmdPrintPackage" Event="OnClick" xmlns="http://schemas.microsoft.com/office/accessservices/2009/11/application"><Statements><Action Name="RunMenuCommand"><Argument Na
-    ' _AXL:me="Command">Refresh</Argument></Action><Action Name="OpenForm"><Argument Name="FormName">fPrintSelect</Argument></Action></Statements></UserInterfaceMacro>
     DoCmd.Close acForm, "fWorksheet"
-
 
 Command637_Click_Exit:
     Exit Sub
@@ -421,11 +390,7 @@ End Sub
 Private Sub cmdEditHospitalMembers_Click()
 On Error GoTo cmdEditHospitalMembers_Click_Err
 
-    ' _AXL:<?xml version="1.0" encoding="UTF-16" standalone="no"?>
-    ' <UserInterfaceMacro For="Command637" Event="OnClick" xmlns="http://schemas.microsoft.com/office/accessservices/2009/11/application"><Statements><Action Name="CloseWindow"><Argument Name="Obje
-    ' _AXL:ctType">Form</Argument><Argument Name="ObjectName">fWorksheet</Argument><Argument Name="Save">Yes</Argument></Action></Statements></UserInterfaceMacro>
     DoCmd.OpenForm "fHospitalMembers", acNormal, "", "", , acNormal
-
 
 cmdEditHospitalMembers_Click_Exit:
     Exit Sub
