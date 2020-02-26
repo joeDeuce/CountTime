@@ -1,4 +1,4 @@
-Option Compare Database
+﻿Option Compare Database
 
 Private Sub Form_Open(Cancel As Integer)
     
@@ -12,11 +12,8 @@ End Sub
 Private Sub Form_Load()
     
     'retrive version number
-    Dim vMaj, vMin As Integer
     Dim Version As String
-    vMaj = GetOption("VersionMajor")
-    vMin = GetOption("VersionMinor")
-    Version = "Version " & CStr(vMaj) & "." & CStr(Format(vMin, "0000"))
+    Version = "v" & GetCountTimeVersion()
     
     DoCmd.RunCommand acCmdWindowHide
     

@@ -5,6 +5,7 @@ Option Explicit
 'Global variables updated throughout so
 'they can be used anywhere (most notably
 'the functions below that are used in queries
+'TODO: remove ALL globals
 Global GlobalOCID As String
 Global GlobalCountID As Integer
 
@@ -37,8 +38,8 @@ Function GetCountID() As String
 
 End Function
 
-' we need to fill up outcount with spaces if there are less than 30.
-' this returns (30 - number of records)
+' we need to fill up outcount with spaces if there are less than gOutCountLines.
+' this returns (gOutCountLines - number of records)
 ' we will use global var GlobalOCID - just need to ensure
 ' it is set when applicable
 Function GetNumRecordsNeededOutCount()
@@ -159,8 +160,7 @@ Function UpdateWorksheet(ByRef Worksheet As Form, ByVal CountID As String, Optio
     ' CountID should equal Worksheet.CountListBox.Value
     ' TODO: not entirely convinced this is the best way to do this
     If CountID = -1 Then
-        'ADD CODE TO LOAD MOST RECENT RECORD
-        '(may no longer be needed)
+        Exit Function
     Else
         DoCmd.SearchForRecord , "", acFirst, "[CountEventID] = " & CountID
     End If
@@ -740,5 +740,33 @@ Sub RemoveImportTextfile()
     End If
 
 End Sub
+
+Function GetCountTimeVersion() As String
+    
+    Dim vMaj, vMin As Integer
+    vMaj = GetOption("VersionMajor")
+    vMin = GetOption("VersionMinor")
+    GetCountTimeVersion = CStr(vMaj) & "." & CStr(Format(vMin, "00"))
+
+End Function
+
+Function DeleteNonclearedCounts(ByVal TargetDate As Date)
+
+    'make sure we don't delete the current day's count(s)
+    Exit Function
+
+End Function
+
+Function GetUser() As String
+    
+    'bad idea to use environment vars for this!
+    'GetUser = Environ("USERDOMAIN") & "\" & Environ("USERNAME")
+    Dim WSNet As Object
+    Set WSNet = CreateObject("WScript.Network")
+    GetUser = WSNet.UserName & "@" & WSNet.UserDomain
+    Set WSNet = Nothing
+    
+End Function
+
 
 
