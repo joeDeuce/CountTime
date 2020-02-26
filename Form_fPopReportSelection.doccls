@@ -1,0 +1,16 @@
+﻿Option Compare Database
+Option Explicit
+
+Private Sub cmcExecute_Click()
+    If IsNull(Me.Combo15) Then Exit Sub
+    DoCmd.OpenReport "rPopReport", acViewPreview, , "datepart('yyyy', CountDate)=" & Me.Combo15, acDialog, Me.Combo15
+End Sub
+
+Private Sub Command0_Click()
+    DoCmd.Close acForm, "fPopReportSelection", acSaveNo
+End Sub
+
+
+Private Sub Form_Load()
+        Me.Combo15.SetFocus
+End Sub
