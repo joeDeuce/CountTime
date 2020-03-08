@@ -88,6 +88,7 @@ Public Function ReadImportedTextfile(ByRef f As Form) As Boolean
         
         End If
         
+        'clean the temp import table
         db.Execute "DELETE * FROM [_tRosterImport]"
         
         Do While Not EOF(intFile)
@@ -107,10 +108,12 @@ Public Function ReadImportedTextfile(ByRef f As Form) As Boolean
             f.Option1.Enabled = False
             f.OptionLabel1.Enabled = False
 
-            'this sometimes causes things to happen out of order
-            'must make sure checks are made in other places to prevent
-            'erratic behavior
-            DoEvents
+            ''this sometimes causes things to happen out of order
+            ''must make sure checks are made in other places to prevent
+            ''erratic behavior
+            'SleepVBA 1
+            'DoEvents
+            If i Mod 3 = 0 Then DoEvents
             
         Loop
         
@@ -273,7 +276,8 @@ Public Function OpenPDF()
 
             'Loop until file is created; probably not the best way to do this
             Do While Dir(GetDBPath & "import.txt") = ""
-                'DoEvents
+                SleepVBA 100
+                DoEvents
             Loop
 
             SleepVBA (250)
